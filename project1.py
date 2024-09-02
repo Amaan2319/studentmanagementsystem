@@ -154,14 +154,26 @@ def update_courses(course_id, course_name):
     else:
         print("Failed to connect db!")
 
-def update_enrollments(student_id, course_id, course_name):
+def update_enrollments( course_id,student_id, course_name):
     con = connect_db()
     if con:
         try:
             cursor = con.cursor()
             query = "UPDATE enrollments SET course_name = %s WHERE course_id = %s AND student_id = %s"
-            cursor.execute(query, (course_name, course_id, student_id))
+            values = (course_name, course_id, student_id)
+            
+            # Debugging: Print the query and values
+            # print(f"Executing Query: {cursor.mogrify(query, values)}")
+            
+            cursor.execute(query, values)
             con.commit()
+
+            # Check if any rows were affected
+            if cursor.rowcount == 0:
+                print("No rows were updated. Check if the course_id and student_id exist.")
+            else:
+                print(f"Updated {cursor.rowcount} rows successfully.")
+                
         except Exception as e:
             print(f"An error occurred: {e}")
             con.rollback()
@@ -169,7 +181,8 @@ def update_enrollments(student_id, course_id, course_name):
             cursor.close()
             con.close()
     else:
-        print("Failed to connect db!")
+        print("Failed to connect to the database!")
+
 
 # Delete data
 def delete_student(student_id):
